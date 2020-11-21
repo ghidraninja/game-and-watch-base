@@ -48,16 +48,20 @@ LTDC_HandleTypeDef hltdc;
 OSPI_HandleTypeDef hospi1;
 
 SAI_HandleTypeDef hsai_BlockA1;
+DMA_HandleTypeDef hdma_sai1_a;
 
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
+
+uint16_t audiobuffer[48000] __attribute__((section (".audio")));
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_OCTOSPI1_Init(void);
@@ -98,6 +102,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_LTDC_Init();
   MX_SPI2_Init();
   MX_OCTOSPI1_Init();
@@ -125,6 +130,12 @@ int main(void)
 
   uint16_t color = 0x0000;
   uint32_t i = 0;
+
+  // Create a continuous square wave and loop it using DMA in circular mode
+  for (uint32_t i = 0; i < sizeof(audiobuffer) / sizeof(audiobuffer[0]); i++) {
+    audiobuffer[i] = (i % (48000 / 500)) > 32 ? 500 : -500;
+  }
+  HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer, sizeof(audiobuffer) / sizeof(audiobuffer[0]));
 
   while (1)
   {
@@ -425,33 +436,17 @@ static void MX_SAI1_Init(void)
 
   /* USER CODE END SAI1_Init 1 */
   hsai_BlockA1.Instance = SAI1_Block_A;
-  hsai_BlockA1.Init.Protocol = SAI_FREE_PROTOCOL;
   hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
-  hsai_BlockA1.Init.DataSize = SAI_DATASIZE_8;
-  hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
-  hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
   hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
   hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
   hsai_BlockA1.Init.NoDivider = SAI_MASTERDIVIDER_ENABLE;
   hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_192K;
+  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_48K;
   hsai_BlockA1.Init.SynchroExt = SAI_SYNCEXT_DISABLE;
-  hsai_BlockA1.Init.MonoStereoMode = SAI_STEREOMODE;
+  hsai_BlockA1.Init.MonoStereoMode = SAI_MONOMODE;
   hsai_BlockA1.Init.CompandingMode = SAI_NOCOMPANDING;
   hsai_BlockA1.Init.TriState = SAI_OUTPUT_NOTRELEASED;
-  hsai_BlockA1.Init.PdmInit.Activation = DISABLE;
-  hsai_BlockA1.Init.PdmInit.MicPairsNbr = 0;
-  hsai_BlockA1.Init.PdmInit.ClockEnable = SAI_PDM_CLOCK1_ENABLE;
-  hsai_BlockA1.FrameInit.FrameLength = 8;
-  hsai_BlockA1.FrameInit.ActiveFrameLength = 1;
-  hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
-  hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
-  hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
-  hsai_BlockA1.SlotInit.FirstBitOffset = 0;
-  hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_DATASIZE;
-  hsai_BlockA1.SlotInit.SlotNumber = 1;
-  hsai_BlockA1.SlotInit.SlotActive = 0x00000000;
-  if (HAL_SAI_Init(&hsai_BlockA1) != HAL_OK)
+  if (HAL_SAI_InitProtocol(&hsai_BlockA1, SAI_I2S_STANDARD, SAI_PROTOCOL_DATASIZE_16BIT, 2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -506,6 +501,22 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
 }
 

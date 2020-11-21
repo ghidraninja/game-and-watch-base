@@ -74,6 +74,7 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.lcd)
+    *(.audio)
     . = ALIGN(4);
   }  > RAM
   /* The startup code goes first into FLASH */
