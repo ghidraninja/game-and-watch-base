@@ -190,6 +190,24 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir $@		
 
+
+
+OPENOCD ?= openocd
+OCDIFACE ?= interface/stlink.cfg
+
+flash: $(BUILD_DIR)/$(TARGET).bin
+	dd if=$(BUILD_DIR)/$(TARGET).bin of=$(BUILD_DIR)/$(TARGET)_flash.bin bs=1024 count=128
+	$(OPENOCD) -f $(OCDIFACE) -c "transport select hla_swd" -f "target/stm32h7x.cfg" -c "reset_config none; program $(BUILD_DIR)/$(TARGET)_flash.bin 0x08000000 verify reset exit"
+
+.PHONY: flash
+
+GDB ?= $(PREFIX)gdb
+
+debug: $(BUILD_DIR)/$(TARGET).elf
+	$(GDB) $< -ex "target extended-remote :3333"
+.PHONY: debug
+
+
 #######################################
 # clean up
 #######################################
