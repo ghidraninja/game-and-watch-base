@@ -61,10 +61,11 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-DTCMRAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
-RAM (xrw)      : ORIGIN = 0x24000000, LENGTH = 1024K
-ITCMRAM (xrw)      : ORIGIN = 0x00000000, LENGTH = 64K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 128K
+  ITCMRAM  (xrw) : ORIGIN = 0x00000000, LENGTH = 64K
+  DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
+  RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = 1024K
+  FLASH    (xr ) : ORIGIN = 0x8000000,  LENGTH = 128K
+  EXTFLASH (xr ) : ORIGIN = 0x90000000, LENGTH = 1024K
 }
 
 /* Define output sections */
@@ -77,6 +78,13 @@ SECTIONS
     *(.audio)
     . = ALIGN(4);
   }  > RAM
+
+  ._extflash :
+  {
+    . = ALIGN(4);
+    _extflash = .;       /* define a global symbols to point at the external flash */
+  } >EXTFLASH
+
   /* The startup code goes first into FLASH */
   .isr_vector :
   {
