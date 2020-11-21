@@ -133,7 +133,7 @@ int main(void)
 
   // Create a continuous square wave and loop it using DMA in circular mode
   for (uint32_t i = 0; i < sizeof(audiobuffer) / sizeof(audiobuffer[0]); i++) {
-    audiobuffer[i] = (i % (48000 / 500)) > 32 ? 500 : -500;
+    audiobuffer[i] = (i % (48000 / 500)) > 48 ? 200 : -200;
   }
   HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer, sizeof(audiobuffer) / sizeof(audiobuffer[0]));
 
