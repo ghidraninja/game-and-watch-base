@@ -105,7 +105,7 @@ void flash_memory_map(OSPI_HandleTypeDef *spi) {
   /* Memory-mapped mode configuration for Linear burst read operations */
   sCommand.OperationType = HAL_OSPI_OPTYPE_READ_CFG;
   sCommand.Instruction = 0xEB; /* 4READ */  //LINEAR_BURST_READ;
-  sCommand.DummyCycles = 8; //DUMMY_CLOCK_CYCLES_SRAM_READ;
+  sCommand.DummyCycles = 6; //DUMMY_CLOCK_CYCLES_SRAM_READ;
 
   if (HAL_OSPI_Command(spi, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=
       HAL_OK) {
