@@ -112,8 +112,8 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
-  lcd_init(&hspi2, &hltdc);
-  memset(framebuffer, 0xff, 320*240*2);
+  // lcd_init(&hspi2, &hltdc);
+  // memset(framebuffer, 0xff, 320*240*2);
 
   /* USER CODE END 2 */
 
@@ -121,81 +121,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   flash_memory_map(&hospi1);
 
-  // Sanity check, sometimes this is triggered
-  uint32_t add = 0x90000000;
-  uint32_t* ptr = (uint32_t*)add;
-  if(*ptr == 0x88888888) {
-    Error_Handler();
+
+  while(1) {
+
   }
 
-  uint16_t color = 0x0000;
-  uint32_t i = 0;
-
-  // Create a continuous square wave and loop it using DMA in circular mode
-  for (uint32_t i = 0; i < sizeof(audiobuffer) / sizeof(audiobuffer[0]); i++) {
-    audiobuffer[i] = (i % (48000 / 500)) > 48 ? 200 : -200;
-  }
-  HAL_SAI_Transmit_DMA(&hsai_BlockA1, audiobuffer, sizeof(audiobuffer) / sizeof(audiobuffer[0]));
-
-  while (1)
-  {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-
-    uint32_t buttons = buttons_get();
-    if(buttons & B_Left) {
-      color = 0xf000;
-    }
-    if(buttons & B_Right) {
-      color = 0x0f00;
-    }
-    if(buttons & B_Up) {
-      color = 0x00f0;
-    }
-    if(buttons & B_Down) {
-      
-      color = *ptr&0xff;
-    }
-    
-    for(int x=0; x < 320; x++) {
-      for(int y=0; y < 240; y++) {
-        // framebuffer[(y*320)+x] = i;
-        if(((x + i)/10 % 2 == 0) && (((y + i)/10 % 2 == 0))){
-          framebuffer[(y*320)+x] = color;
-        } else {
-          framebuffer[(y*320)+x] = 0xffff;
-        }
-        
-        // i++;
-      }
-      // i++;
-    }
-    
-    HAL_Delay(20);
-    i++;
-    // if(i % 30 == 0) {
-    //   if(color == 0xf800) {
-    //     color = 0x7e0;
-    //   } else {
-    //     color = 0xf800;
-    //   }
-      
-    // }
-// HAL_Delay(500);
-// for(int x=0; x < 320; x++) {
-// for(int y=0; y < 240; y++) {
-// framebuffer[(y*320)+x] = 0x7e0;
-// }
-// }
-// HAL_Delay(500);
-// for(int x=0; x < 320; x++) {
-// for(int y=0; y < 240; y++) {
-// framebuffer[(y*320)+x] = 0x1f;
-// }
-// }
-// HAL_Delay(500);
-  }
+  
   /* USER CODE END 3 */
 }
 
@@ -310,7 +241,6 @@ static void MX_LTDC_Init(void)
   /* USER CODE END LTDC_Init 0 */
 
   LTDC_LayerCfgTypeDef pLayerCfg = {0};
-  LTDC_LayerCfgTypeDef pLayerCfg1 = {0};
 
   /* USER CODE BEGIN LTDC_Init 1 */
 
@@ -351,24 +281,6 @@ static void MX_LTDC_Init(void)
   pLayerCfg.Backcolor.Green = 255;
   pLayerCfg.Backcolor.Red = 0;
   if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  pLayerCfg1.WindowX0 = 0;
-  pLayerCfg1.WindowX1 = 0;
-  pLayerCfg1.WindowY0 = 0;
-  pLayerCfg1.WindowY1 = 0;
-  pLayerCfg1.Alpha = 0;
-  pLayerCfg1.Alpha0 = 0;
-  pLayerCfg1.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-  pLayerCfg1.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg1.FBStartAdress = GFXMMU_VIRTUAL_BUFFER0_BASE;
-  pLayerCfg1.ImageWidth = 0;
-  pLayerCfg1.ImageHeight = 0;
-  pLayerCfg1.Backcolor.Blue = 0;
-  pLayerCfg1.Backcolor.Green = 0;
-  pLayerCfg1.Backcolor.Red = 0;
-  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg1, 1) != HAL_OK)
   {
     Error_Handler();
   }
