@@ -26,12 +26,12 @@ void flash_memory_map(OSPI_HandleTypeDef *spi) {
     .AlternateBytes = 0b000100, //0xa5, // Hmmmm
   };
 
-  // HAL_Delay(1);
+  HAL_Delay(1);
   
   if(HAL_OSPI_Command(spi, &cmd, 1000) != HAL_OK) {
       Error_Handler();
   }
-  // HAL_Delay(50);
+  HAL_Delay(50);
 
 
   OSPI_MemoryMappedTypeDef sMemMappedCfg;
