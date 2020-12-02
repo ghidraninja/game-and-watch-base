@@ -124,7 +124,6 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
--ICore/chocdoom \
 -ICore/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
