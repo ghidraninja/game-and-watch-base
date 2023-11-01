@@ -200,6 +200,24 @@ SECTIONS
     libgcc.a ( * )
   }
 
+.lcd :
+  {
+    _lcdstart = .;
+    . = ALIGN(4);
+    *(.lcd)
+    . = ALIGN(4);
+    _lcdend = .;
+  } > RAM
+
+    .audio :
+  {
+    _audiostart = .;
+    . = ALIGN(4);
+    *(.audio)
+    . = ALIGN(4);
+    _audioend = .;
+  } > RAM
+
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
 
